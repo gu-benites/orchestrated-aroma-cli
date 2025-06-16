@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import * as dotenv from 'dotenv';
 import { z } from 'zod';
-import { getAgentConfig } from './agent-instructions';
+import { PUBMED_AGENT_CONFIG } from './agent-instructions';
 import { biomedicalTranslatorAgent } from './biomedical-translator-agent';
 
 // Load environment variables
@@ -101,9 +101,8 @@ Never give a pass on the first evaluation - always look for improvements.`,
 
 // PMID Details Agent - specialized for paper details
 function createPMIDDetailsAgent(mcpServer: MCPServerStdio) {
-  const agentConfig = getAgentConfig();
   return new Agent({
-    name: 'PMID Details Specialist',
+    name: PUBMED_AGENT_CONFIG.name,
     model: agentConfig.model,
     modelSettings: agentConfig.modelSettings,
     instructions: `${agentConfig.instructions}
@@ -119,9 +118,8 @@ SPECIALIZED FOR PMID DETAILS:
 
 // Biomedical Search Agent - specialized for general research
 function createBiomedicalSearchAgent(mcpServer: MCPServerStdio) {
-  const agentConfig = getAgentConfig();
   return new Agent({
-    name: 'Biomedical Search Specialist',
+    name: PUBMED_AGENT_CONFIG.name,
     model: agentConfig.model,
     modelSettings: agentConfig.modelSettings,
     instructions: `${agentConfig.instructions}
@@ -210,11 +208,6 @@ function classifyQueryWithInputGuardrail(userQuery: string, sessionMemory: Orche
   const detectedLanguage = hasPortuguese ? 'Portuguese' : hasSpanish ? 'Spanish' : 'English';
   const confidence = extractedPMID ? 0.95 : (hasPortuguese || hasSpanish) ? 0.9 : 0.8;
 
-  console.log(`🎯 Input Guardrail Classification: ${queryType} | ${detectedLanguage} (confidence: ${Math.round(confidence * 100)}%)`);
-  console.log(`🔍 Analysis: ${reasoning}`);
-  if (extractedPMID) {
-    console.log(`📄 PMID Detected: ${extractedPMID}`);
-  }
 
   return {
     queryType,
@@ -341,14 +334,11 @@ async function saveOrchestrationMemory(memory: OrchestrationMemory): Promise<voi
 export async function orchestratedBiomedicalResearch(
   userQuery: string,
   sessionMemory?: OrchestrationMemory,
-  sharedMcpServer?: MCPServerStdio
-): Promise<{ result: string; memory: OrchestrationMemory; runResult: RunResult<any, any> }> {
+  sharedMcpServer?: MCPServerStdio): Promise<{ result: string; memory: OrchestrationMemory; runResult: RunResult<any, any> }> {
   // Load or use provided session memory
   let memory = sessionMemory || await loadOrchestrationMemory();
 
   // Get the same agent configuration that works in index.ts
-  const agentConfig = getAgentConfig();
-
   // Use shared MCP server if provided, otherwise create new one
   let mcpServer: MCPServerStdio | null = null;
   let shouldCloseMcpServer = false;
@@ -414,7 +404,7 @@ export async function orchestratedBiomedicalResearch(
       }
       
       // Step 3: Create research agent with MCP tools and query-specific instructions
-      let researchInstructions = agentConfig.instructions;
+      let researchInstructions = PUBMED_AGENT_CONFIG.instructions;
       let researchQuery = '';
 
       if (queryClassification.queryType === 'pmid_details' && queryClassification.extractedPMID) {
@@ -437,9 +427,9 @@ Use these EXACT terms in your MCP tool calls. Do not translate them again.`;
       }
 
       const researchAgent = new Agent({
-        name: agentConfig.name,
-        model: agentConfig.model,
-        modelSettings: agentConfig.modelSettings,
+        name: PUBMED_AGENT_CONFIG.name,
+        model: PUBMED_AGENT_CONFIG.model,
+        modelSettings: PUBMED_AGENT_CONFIG.modelSettings,
         instructions: `${researchInstructions}
 
 CONTEXT FROM PREVIOUS INTERACTIONS:

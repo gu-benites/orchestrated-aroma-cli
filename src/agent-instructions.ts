@@ -166,59 +166,6 @@ Remember: Your goal is to provide researchers with precise, well-cited biomedica
 };
 
 // ============================================================================
-// 🎛️ PRESET CONFIGURATIONS
-// ============================================================================
-// Quick presets for different use cases
-
-/**
- * Fast Research Configuration
- * Uses gpt-4o-mini for quick responses
- */
-export const FAST_RESEARCH_CONFIG: PubMedAgentConfig = {
-  ...PUBMED_AGENT_CONFIG,
-  model: 'gpt-4o-mini',
-  modelSettings: {
-    ...PUBMED_AGENT_CONFIG.modelSettings,
-    temperature: 0.2,
-    maxTokens: 2000,
-  }
-};
-
-/**
- * Deep Research Configuration
- * Uses gpt-4o for comprehensive analysis
- */
-export const DEEP_RESEARCH_CONFIG: PubMedAgentConfig = {
-  ...PUBMED_AGENT_CONFIG,
-  model: 'gpt-4o',
-  modelSettings: {
-    ...PUBMED_AGENT_CONFIG.modelSettings,
-    temperature: 0.4,
-    maxTokens: 6000,
-  }
-};
-
-/**
- * Nano Research Configuration
- * Uses gpt-4.1-nano for ultra-fast responses
- */
-export const NANO_RESEARCH_CONFIG: PubMedAgentConfig = {
-  ...PUBMED_AGENT_CONFIG,
-  model: 'gpt-4.1-nano',
-  modelSettings: {
-    ...PUBMED_AGENT_CONFIG.modelSettings,
-    temperature: 0.1,
-    maxTokens: 5000,
-  }
-};
-
-// ============================================================================
-// 🔧 CONFIGURATION UTILITIES
-// ============================================================================
-
-/**
- * Get configuration by environment or preference
- */
 export function getAgentConfig(mode: 'fast' | 'deep' | 'nano' | 'default' = 'default'): PubMedAgentConfig {
   switch (mode) {
     case 'fast':
@@ -231,6 +178,10 @@ export function getAgentConfig(mode: 'fast' | 'deep' | 'nano' | 'default' = 'def
       return PUBMED_AGENT_CONFIG;
   }
 }
+
+// ============================================================================
+// 🔄 BACKWARD COMPATIBILITY
+// ============================================================================
 
 /**
  * Create custom configuration
@@ -245,28 +196,6 @@ export function createCustomConfig(overrides: Partial<PubMedAgentConfig>): PubMe
     }
   };
 }
-
-// ============================================================================
-// 📊 CONFIGURATION INFO
-// ============================================================================
-
-/**
- * Display current configuration info
- */
-export function getConfigInfo(config: PubMedAgentConfig): string {
-  return `
-🤖 Agent: ${config.name} v${config.version}
-🧠 Model: ${config.model}
-🌡️  Temperature: ${config.modelSettings.temperature}
-📏 Max Tokens: ${config.modelSettings.maxTokens}
-⚡ Parallel Tools: ${config.modelSettings.parallelToolCalls ? 'Enabled' : 'Disabled'}
-🔧 Tool Choice: ${config.modelSettings.toolChoice || 'auto'}
-`;
-}
-
-// ============================================================================
-// 🔄 BACKWARD COMPATIBILITY
-// ============================================================================
 
 /**
  * Legacy export for backward compatibility
