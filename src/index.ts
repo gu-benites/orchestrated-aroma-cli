@@ -1,9 +1,8 @@
-import { runFixedOrchestratedCLI } from './orchestrated-research';
+// src/index.ts
 
-// Entry point for Research Orchestrator CLI
-console.log('Research Orchestrator CLI initialized.');
+import { runCLI } from './core';
 
-// If this file is run directly, start the CLI
+// If this file is executed directly, start the command-line interface.
 if (require.main === module) {
-  runFixedOrchestratedCLI();
+  runCLI();
 }
