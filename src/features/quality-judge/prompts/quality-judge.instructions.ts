@@ -4,6 +4,7 @@ import type { AgentConfiguration } from '@openai/agents';
 import { QualityEvaluationSchema } from '../schemas/quality-evaluation.schema';
 
 export const qualityJudgeAgentConfig: Partial<AgentConfiguration> = {
+  name: 'qualityJudgeAgent', // Add the agent's name
   model: 'gpt-4o-mini', // A model with strong reasoning capabilities is required for evaluation.
   modelSettings: {
     temperature: 0.0, // Zero temperature for consistent, objective evaluations.

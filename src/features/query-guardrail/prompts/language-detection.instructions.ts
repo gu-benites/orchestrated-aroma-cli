@@ -4,6 +4,8 @@ import type { AgentConfiguration } from '@openai/agents';
 import { LanguageDetectionResultSchema } from '../schemas/language-detection.schema';
 
 export const languageDetectionAgentConfig: Partial<AgentConfiguration> = {
+  name: 'Language Detection Agent',
+  description: 'A specialized agent that detects the primary language of a given text.',
   model: 'gpt-4.1-nano', // Perfect for fast, cheap, and accurate classification.
   modelSettings: {
     temperature: 0.0,

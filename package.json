@@ -11,5 +11,8 @@
   },
   "scripts": {
     "build-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.3"
   }
 }
