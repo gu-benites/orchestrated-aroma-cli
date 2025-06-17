@@ -142,23 +142,25 @@ function startMCPServer() {
             tools: [
             {
               name: 'find_entity',
-              description: 'Find the identifier(s) for a specific bioconcept using a free text query',
+              description: 'MANDATORY FIRST STEP: Find the standardized identifier(s) for a biomedical concept. Always use this first before searching to ensure accurate results. Returns entity IDs that should be used in subsequent searches.',
               inputSchema: {
                 type: 'object',
                 properties: {
                   query: {
                     type: 'string',
-                    description: 'The text to search for'
+                    description: 'The biomedical term to look up (e.g., "linalool", "anxiety")'
                   },
                   concept: {
                     type: 'string',
-                    description: 'Optional: Filter by concept type (gene, disease, chemical, species, mutation)',
+                    description: 'Optional: Filter by concept type for more precise results',
                     enum: ['gene', 'disease', 'chemical', 'species', 'mutation']
                   },
                   limit: {
                     type: 'integer',
                     description: 'Maximum number of results to return',
-                    default: 5
+                    default: 5,
+                    minimum: 1,
+                    maximum: 10
                   }
                 },
                 required: ['query']
@@ -166,7 +168,7 @@ function startMCPServer() {
             },
             {
               name: 'search_pubtator',
-              description: 'Search for relevant PubMed/PMC articles in PubTator3 using flexible queries',
+              description: 'Search for relevant PubMed/PMC articles in PubTator3 using flexible queries. Before using this tool, try to get the entity ID using the find_entity tool, if not found any, use the query as it is.',
               inputSchema: {
                 type: 'object',
                 properties: {

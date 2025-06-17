@@ -7,29 +7,26 @@ import { createBiomedicalSearchAgent } from './biomedical-search.agent';
 import { createPMIDDetailsAgent } from './pmid-details.agent';
 
 /**
- * Creates the Triage Agent, which acts as a router for the biomedical research swarm.
+ * Creates the Front Desk Agent, which serves as the main point of contact for users
+ * and coordinates with specialist agents when technical expertise is needed.
  *
- * This agent's sole responsibility is to analyze the user's query (which it
- * expects to be in English) and delegate the task to the appropriate
- * specialist agent via the `handoffs` mechanism.
+ * This agent handles all user interactions, provides a friendly interface,
+ * and consults specialists when technical knowledge is required.
  *
  * @param mcpServer - The running MCP server instance, which will be passed down to the specialist agents.
- * @returns A configured Triage Agent instance with handoff capabilities.
+ * @returns A configured Front Desk Agent instance with access to specialists.
  */
 export function createTriageAgent(mcpServer: MCPServerStdio) {
-  // Instantiate the specialist agents that this triage agent can hand off to.
+  // Instantiate the specialist agents that this agent can consult
   const pmidAgent = createPMIDDetailsAgent(mcpServer);
   const searchAgent = createBiomedicalSearchAgent(mcpServer);
 
-  return Agent.create({
+  return new Agent({
     ...triageAgentConfig,
-    name: 'Biomedical Triage Agent',
-    description:
-      'A routing agent that analyzes biomedical queries and hands them off to the correct specialist.',
-    // This agent has no tools of its own. Its only job is to handoff.
-    mcpServers: [],
+    name: 'Front Desk Agent',
+    handoffDescription: 'I am the front desk agent. I provide a friendly interface and coordinate with specialists when technical expertise is needed.',
+    mcpServers: [mcpServer],
     tools: [],
-    // The list of specialist agents this Triage Agent can delegate tasks to.
     handoffs: [pmidAgent, searchAgent],
   });
 }

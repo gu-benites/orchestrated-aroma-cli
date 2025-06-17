@@ -3,7 +3,7 @@
 import type { AgentConfiguration } from '@openai/agents';
 
 export const pmidDetailsAgentConfig: Partial<AgentConfiguration> = {
-  model: 'gpt-4.1-nano', // A fast, efficient model for a simple, focused task.
+  model: 'gpt-4o', // A fast, efficient model for a simple, focused task.
   modelSettings: {
     temperature: 0.1,
     maxTokens: 2500,

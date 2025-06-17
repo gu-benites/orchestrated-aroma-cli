@@ -17,8 +17,6 @@ export function createPMIDDetailsAgent(mcpServer: MCPServerStdio) {
   return new Agent({
     ...pmidDetailsAgentConfig,
     name: 'PMID Details Specialist',
-    description:
-      'A specialist agent that retrieves and summarizes details for a given PubMed ID (PMID).',
     handoffDescription: 'I specialize in retrieving detailed information for specific PubMed IDs (PMIDs). I can fetch full paper text, abstracts, and provide comprehensive summaries of individual research papers.',
     mcpServers: [mcpServer],
     tools: [],

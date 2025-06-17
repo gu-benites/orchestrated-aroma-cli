@@ -18,8 +18,6 @@ export function createBiomedicalSearchAgent(mcpServer: MCPServerStdio) {
   return new Agent({
     ...biomedicalSearchAgentConfig,
     name: 'Biomedical Search Specialist',
-    description:
-      'A specialist agent that performs general biomedical research to answer complex questions.',
     handoffDescription: 'I specialize in conducting comprehensive biomedical research using PubTator3 database. I can search for studies, analyze research papers, and provide evidence-based answers about diseases, treatments, chemicals, and genes.',
     mcpServers: [mcpServer],
     // This agent has no other tools. Its capabilities are defined by the MCP server.

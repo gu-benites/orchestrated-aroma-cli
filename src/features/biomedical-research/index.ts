@@ -11,3 +11,5 @@
  */
 
 export { createTriageAgent } from './agent/triage.agent';
+export { createBiomedicalSearchAgent } from './agent/biomedical-search.agent';
+export { createPMIDDetailsAgent } from './agent/pmid-details.agent';
