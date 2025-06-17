@@ -21,7 +21,7 @@ export function createTriageAgent(mcpServer: MCPServerStdio) {
   const pmidAgent = createPMIDDetailsAgent(mcpServer);
   const searchAgent = createBiomedicalSearchAgent(mcpServer);
 
-  return new Agent({
+  return Agent.create({
     ...triageAgentConfig,
     name: 'Biomedical Triage Agent',
     description:

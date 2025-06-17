@@ -2,7 +2,7 @@
 
 import { createInterface } from 'node:readline/promises';
 import * as path from 'node:path';
-import { MCPServerStdio, stream } from '@openai/agents';
+import { MCPServerStdio, run, withTrace } from '@openai/agents';
 import {
   loadOrchestrationMemory,
   saveOrchestrationMemory,
@@ -10,6 +10,9 @@ import {
   type OrchestrationMemory,
 } from './session-memory';
 import { runJudgedResearch } from '../features/quality-judge';
+import { createTriageAgent } from '../features/biomedical-research';
+import { classifyQuery } from '../features/query-guardrail';
+import { biomedicalTranslatorAgent } from '../features/translation';
 
 /**
  * The main entry point for the interactive Command-Line Interface (CLI).
@@ -56,35 +59,41 @@ export async function runCLI() {
         sessionMemory = memory;
         console.log('\n\n✅ Judged Research Result:\n', result);
       } else {
-        // For standard queries, we will use stream() for a real-time experience.
+        // For standard queries, wrap the entire workflow in a single trace
         console.log('\n🔬 Research in Progress...');
-        const runStream = await stream({
-            agent: createTriageAgent(mcpServer), // We need to create the agent to stream it
-            input,
-            runState: sessionMemory.lastRunState, // Use last state to potentially resume
-        });
 
-        let finalOutput = '';
-        for await (const event of runStream.events) {
-            if (event.type === 'handoff_start') {
-                process.stdout.write(`\n[Routing to ${event.agentName}...]`);
-            }
-            if (event.type === 'tool_call') {
-                process.stdout.write(`\n[Calling tool: ${event.toolName}]`);
-            }
-            if (event.type === 'text_delta') {
-                process.stdout.write(event.delta);
-            }
-            if (event.type === 'final_output') {
-                finalOutput = event.output;
-            }
-        }
-        
-        // Update memory after the stream is complete
-        sessionMemory.totalInteractions++;
-        sessionMemory.conversationHistory = await runStream.history();
-        sessionMemory.lastRunState = (await runStream.finalResult()).state.toString();
-        console.log('\n\n✅ Research Complete.');
+        await withTrace('Biomedical Research Query', async () => {
+          // 1. GUARDRAIL: Classify the input query.
+          console.log('🛡️  Running Guardrail...');
+          const classification = await classifyQuery(input);
+          console.log(`🎯 Classification: ${classification.queryType} | Language: ${classification.detectedLanguage}`);
+
+          // 2. TRANSLATE: If needed, translate the query to English.
+          let finalQuery = input;
+          if (classification.needsTranslation) {
+            console.log('🌍 Translating to English...');
+            const translationResult = await run(biomedicalTranslatorAgent, input);
+            finalQuery = translationResult.finalOutput || input;
+            console.log(`🗣️  Translated Query: "${finalQuery}"`);
+          }
+
+          // 3. ROUTE & EXECUTE: Use the Triage agent to handoff to the correct specialist.
+          console.log('🔄 Routing to specialist...');
+          const triageAgent = createTriageAgent(mcpServer);
+
+          // Use the correct run function signature: run(agent, input)
+          const researchResult = await run(triageAgent, finalQuery);
+
+          // 4. UPDATE MEMORY: Persist the results of this interaction.
+          sessionMemory.totalInteractions++;
+          sessionMemory.conversationHistory = researchResult.history;
+          if (researchResult.state) {
+            sessionMemory.lastRunState = researchResult.state.toString();
+          }
+
+          const finalOutput = researchResult.finalOutput || 'No results found.';
+          console.log('\n\n✅ Research Complete:\n', finalOutput);
+        });
       }
 
       await saveOrchestrationMemory(sessionMemory);
@@ -93,9 +102,11 @@ export async function runCLI() {
     console.error('\n❌ An unexpected error occurred:', error);
   } finally {
     rl.close();
-    if (mcpServer.state !== 'closed') {
+    try {
       await mcpServer.close();
       console.log('\n🔌 Shared MCP server connection closed.');
+    } catch (error) {
+      // Server might already be closed, ignore the error
     }
   }
 }

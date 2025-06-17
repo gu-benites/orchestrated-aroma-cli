@@ -30,7 +30,8 @@ export async function classifyQuery(
   }
 
   // Step 2: Make a targeted, asynchronous call to the Language Detection agent.
-  const langResult = await run(languageDetectionAgent, userQuery).finalOutput;
+  const langDetectionResult = await run(languageDetectionAgent, userQuery);
+  const langResult = langDetectionResult.finalOutput;
 
   if (!langResult) {
     // Fallback in case the agent fails

@@ -7,7 +7,7 @@ export const biomedicalSearchAgentConfig: Partial<AgentConfiguration> = {
   modelSettings: {
     temperature: 0.2, // Low temperature for factual, focused responses.
     maxTokens: 3000,
-    toolChoice: 'required', // This agent MUST use tools to answer.
+    toolChoice: 'auto', // Let the agent decide when to use tools
   },
   instructions: `You are a highly specialized biomedical research assistant. Your role is to conduct general research in the PubTator3 database to answer user queries. You will receive a query that has already been translated to English.
 
